@@ -8,7 +8,6 @@ import java.time.Instant;
 @Data
 @Builder(toBuilder = true)
 public class UserTransaction {
-    private Integer id;
     private Integer userId;
     private Integer beerId;
     private Instant timeOfSale;

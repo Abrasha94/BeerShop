@@ -16,4 +16,5 @@ public class Beer {
     private Integer ibu;
     private Instant created;
     private Instant update;
+    private BeerDescription beerDescription;
 }
