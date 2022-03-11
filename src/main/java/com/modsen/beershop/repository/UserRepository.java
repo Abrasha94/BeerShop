@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class UserRepository {
 
-    public static final String SELECT_USER_BY_LOGIN_OR_EMAIL = "select * from users where login = ? or email = ?";
+    private static final String SELECT_USER_BY_LOGIN_OR_EMAIL = "select * from users where login = ? or email = ?";
     private static final String CREATE_USER = "insert into users (login, pass, email, uuid, role)" +
             "values (?, ?, ?, ?, ?)";
     private static final String SELECT_USERS_BY_LOGIN_AND_PASSWORD = "select * from users where login = ? and pass = ?";
@@ -21,13 +21,13 @@ public class UserRepository {
     private static final String UUID = "uuid";
     private static final String ROLE = "role";
 
-    public boolean isExistUserByLoginOrEmail(String name, String email) {
+    public boolean isExistUserByLoginOrEmail(String login, String email) {
         try (Connection conn = ConnectionPool.getConnection();
              PreparedStatement ps = conn.prepareStatement(SELECT_USER_BY_LOGIN_OR_EMAIL)) {
-            ps.setString(1, name);
+            ps.setString(1, login);
             ps.setString(2, email);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                return resultSet.next();
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
             }
         } catch (SQLException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
@@ -54,14 +54,14 @@ public class UserRepository {
              PreparedStatement ps = conn.prepareStatement(SELECT_USERS_BY_LOGIN_AND_PASSWORD)) {
             ps.setString(1, login);
             ps.setString(2, password);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     user = User.builder()
-                            .login(resultSet.getString(LOGIN))
-                            .pass(resultSet.getString(PASSWORD))
-                            .email(resultSet.getString(EMAIL))
-                            .uuid(resultSet.getString(UUID))
-                            .role(resultSet.getString(ROLE))
+                            .login(rs.getString(LOGIN))
+                            .pass(rs.getString(PASSWORD))
+                            .email(rs.getString(EMAIL))
+                            .uuid(rs.getString(UUID))
+                            .role(rs.getString(ROLE))
                             .build();
                 }
                 return Optional.ofNullable(user);

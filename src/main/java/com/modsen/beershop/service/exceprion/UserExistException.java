@@ -1,0 +1,7 @@
+package com.modsen.beershop.service.exceprion;
+
+public class UserExistException extends RuntimeException {
+    public UserExistException(String message) {
+        super(message);
+    }
+}
