@@ -16,8 +16,8 @@ public class RegistrationService {
     public static final String ROLE_USER = "user";
 
     private final ValidateService validateService;
-    private final List<Validator<RegistrationRequest>> validators;
     private final UserRepository userRepository;
+    private final List<Validator<RegistrationRequest>> validators;
 
     public String register(RegistrationRequest registrationRequest) {
 

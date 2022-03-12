@@ -1,5 +1,7 @@
 package com.modsen.beershop.repository.config;
 
+import com.modsen.beershop.service.exceprion.ConfigurationException;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -26,7 +28,7 @@ public class Configuration {
             FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE);
             config.load(fileInputStream);
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new ConfigurationException(e.getMessage());
         }
     }
 

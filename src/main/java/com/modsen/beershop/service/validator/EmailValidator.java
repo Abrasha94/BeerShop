@@ -15,7 +15,7 @@ public class EmailValidator implements Validator<RegistrationRequest> {
     public boolean isValid(RegistrationRequest value) {
         Pattern pattern = Pattern.compile(EMAIL_REGEX);
         Matcher matcher = pattern.matcher(value.getEmail());
-        return matcher.matches();
+        return !matcher.matches();
     }
 
     @Override

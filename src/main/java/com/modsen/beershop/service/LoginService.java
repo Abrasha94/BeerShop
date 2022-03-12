@@ -13,8 +13,8 @@ import java.util.List;
 public class LoginService {
     public static final String INCORRECT_LOGIN_OR_PASSWORD = "Wrong login or password!";
     private final ValidateService validateService;
-    private final List<Validator<LoginRequest>> validators;
     private final UserRepository userRepository;
+    private final List<Validator<LoginRequest>> validators;
 
     public User login(LoginRequest loginRequest) {
 

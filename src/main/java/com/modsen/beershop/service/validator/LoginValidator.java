@@ -14,7 +14,7 @@ public class LoginValidator implements Validator<RegistrationRequest> {
     public boolean isValid(RegistrationRequest value) {
         final Pattern pattern = Pattern.compile(NAME_REGEX);
         final Matcher matcher = pattern.matcher(value.getLogin());
-        return matcher.matches();
+        return !matcher.matches();
     }
 
     @Override

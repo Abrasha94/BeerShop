@@ -16,9 +16,10 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class RegistrationCommand implements Command {
 
+    public static final String REGISTRATION = "/registration";
     private final ObjectMapper objectMapper;
-    private final RegistrationService registrationService;
     private final ResponseService responseService;
+    private final RegistrationService registrationService;
 
     @Override
     public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
@@ -31,5 +32,11 @@ public class RegistrationCommand implements Command {
         } catch (UserExistException | ValidateException e) {
             responseService.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
         }
+    }
+
+    @Override
+    public boolean filter(HttpServletRequest httpServletRequest) {
+        final String path = httpServletRequest.getPathInfo();
+        return path.startsWith(REGISTRATION);
     }
 }
