@@ -24,7 +24,6 @@ public class LoginCommand implements Command {
     public static final String LOGIN = "/login";
 
     private final ObjectMapper objectMapper;
-    private final ResponseService responseService;
     private final LoginService loginService;
 
     @Override
@@ -38,15 +37,15 @@ public class LoginCommand implements Command {
             if (user.getRole().equals(USER)) {
                 httpServletRequest.getSession().setAttribute(ROLE, USER);
                 httpServletRequest.getSession().setAttribute(UUID, user.getUuid());
-                responseService.send(httpServletResponse, WELCOME_BACK_MESSAGE + user.getLogin(),
+                ResponseService.INSTANCE.send(httpServletResponse, WELCOME_BACK_MESSAGE + user.getLogin(),
                         HttpServletResponse.SC_OK);
             }
             if (user.getRole().equals(ADMIN)) {
                 httpServletRequest.getSession().setAttribute(ROLE, ADMIN);
-                responseService.send(httpServletResponse, HELLO_ADMIN_MESSAGE, HttpServletResponse.SC_OK);
+                ResponseService.INSTANCE.send(httpServletResponse, HELLO_ADMIN_MESSAGE, HttpServletResponse.SC_OK);
             }
         } catch (UserNotFoundException e) {
-            responseService.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
+            ResponseService.INSTANCE.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

@@ -18,7 +18,6 @@ public class RegistrationCommand implements Command {
 
     public static final String REGISTRATION = "/registration";
     private final ObjectMapper objectMapper;
-    private final ResponseService responseService;
     private final RegistrationService registrationService;
 
     @Override
@@ -28,9 +27,9 @@ public class RegistrationCommand implements Command {
                 objectMapper.readValue(httpServletRequest.getInputStream(), RegistrationRequest.class);
         try {
             final String uuid = registrationService.register(registrationRequest);
-            responseService.send(httpServletResponse, new UserRegistryResponse(uuid), HttpServletResponse.SC_OK);
+            ResponseService.INSTANCE.send(httpServletResponse, new UserRegistryResponse(uuid), HttpServletResponse.SC_OK);
         } catch (UserExistException | ValidateException e) {
-            responseService.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+            ResponseService.INSTANCE.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 

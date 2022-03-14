@@ -15,8 +15,6 @@ public class RegistrationService {
     public static final String LOGIN_OR_EMAIL_TAKEN = "Login or Email is already taken";
     public static final String ROLE_USER = "user";
 
-    private final ValidateService validateService;
-    private final UserRepository userRepository;
     private final List<Validator<RegistrationRequest>> validators;
 
     public String register(RegistrationRequest registrationRequest) {
@@ -25,14 +23,14 @@ public class RegistrationService {
         final String password = registrationRequest.getPassword();
         final String email = registrationRequest.getEmail();
 
-        validateService.validate(validators, registrationRequest);
+        ValidateService.INSTANCE.validate(validators, registrationRequest);
 
-        if (userRepository.isExistUserByLoginOrEmail(login, email)) {
+        if (UserRepository.INSTANCE.isExistUserByLoginOrEmail(login, email)) {
             throw new UserExistException(LOGIN_OR_EMAIL_TAKEN);
         }
 
         final String uuid = UUID.randomUUID().toString();
-        userRepository.createUser(login, password, email, uuid, ROLE_USER);
+        UserRepository.INSTANCE.createUser(login, password, email, uuid, ROLE_USER);
 
         return uuid;
     }

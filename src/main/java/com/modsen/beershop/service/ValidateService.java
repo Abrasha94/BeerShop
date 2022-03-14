@@ -6,7 +6,8 @@ import com.modsen.beershop.service.validator.Validator;
 import java.util.List;
 import java.util.Optional;
 
-public class ValidateService {
+public enum ValidateService {
+    INSTANCE;
 
     public <T> void validate(List<Validator<T>> validators, T data) {
         final Optional<String> errorMessage = validators.stream()

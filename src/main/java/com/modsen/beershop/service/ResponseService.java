@@ -1,21 +1,17 @@
 package com.modsen.beershop.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 
-@Data
-@RequiredArgsConstructor
-public class ResponseService {
+public enum ResponseService {
+    INSTANCE;
 
     private static final String HEADER = "Content-type";
     private static final String CONTENT_TYPE = "application/json";
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public void create(HttpServletResponse httpServletResponse, Object dto, Integer code) throws IOException {

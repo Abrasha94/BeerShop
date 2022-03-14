@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class Configuration {
+public enum Configuration {
+
+    INSTANCE;
     public static final String PROPERTIES_FILE = "src/main/resources/config.properties";
     public static final String DB_DRIVER = "db.driver";
     public static final String DB_URL = "db.URL";
@@ -23,7 +25,7 @@ public class Configuration {
 
     private final Properties config = new Properties();
 
-    public Configuration() {
+    Configuration() {
         try {
             FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE);
             config.load(fileInputStream);

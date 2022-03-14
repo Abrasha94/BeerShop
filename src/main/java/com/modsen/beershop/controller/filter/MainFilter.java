@@ -6,7 +6,6 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 
@@ -25,11 +24,8 @@ public class MainFilter implements Filter {
     public static final String ITEMS = "/items";
     public static final String BEERS = "/beers";
 
-    private ResponseService responseService;
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        responseService = new ResponseService(new ObjectMapper());
     }
 
     @Override
@@ -45,7 +41,7 @@ public class MainFilter implements Filter {
             chain.doFilter(servletRequest, servletResponse);
         } else {
             if (session == null) {
-                responseService.send(res, SING_IN_MESSAGE, HttpServletResponse.SC_BAD_REQUEST);
+                ResponseService.INSTANCE.send(res, SING_IN_MESSAGE, HttpServletResponse.SC_BAD_REQUEST);
             } else {
                 if (session.getAttribute(ROLE).equals(USER)) {
                     if (path.startsWith(BEERS) | path.startsWith(ITEMS) | path.startsWith(HISTORY)) {
@@ -57,7 +53,7 @@ public class MainFilter implements Filter {
                         chain.doFilter(servletRequest, servletResponse);
                     }
                 }
-                responseService.send(res, NOT_FOUND_MESSAGE, HttpServletResponse.SC_NOT_FOUND);
+                ResponseService.INSTANCE.send(res, NOT_FOUND_MESSAGE, HttpServletResponse.SC_NOT_FOUND);
             }
         }
     }

@@ -9,13 +9,12 @@ import java.sql.SQLException;
 public class ConnectionPool {
 
     private static final HikariDataSource dataSource;
-    private static final Configuration configuration = new Configuration();
 
     static {
         dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl(configuration.getURL());
-        dataSource.setUsername(configuration.getUser());
-        dataSource.setPassword(configuration.getPassword());
+        dataSource.setJdbcUrl(Configuration.INSTANCE.getURL());
+        dataSource.setUsername(Configuration.INSTANCE.getUser());
+        dataSource.setPassword(Configuration.INSTANCE.getPassword());
     }
 
     private ConnectionPool() {

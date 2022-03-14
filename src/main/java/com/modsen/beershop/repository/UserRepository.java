@@ -9,7 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-public class UserRepository {
+public enum UserRepository {
+    INSTANCE;
 
     private static final String SELECT_USER_BY_LOGIN_OR_EMAIL = "select * from users where login = ? or email = ?";
     private static final String CREATE_USER = "insert into users (login, pass, email, uuid, role)" +
