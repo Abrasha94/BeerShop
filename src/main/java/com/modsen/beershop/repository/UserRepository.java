@@ -21,6 +21,7 @@ public enum UserRepository {
     private static final String EMAIL = "email";
     private static final String UUID = "uuid";
     private static final String ROLE = "role";
+    public static final String ID = "id";
 
     public boolean isExistUserByLoginOrEmail(String login, String email) {
         try (Connection conn = ConnectionPool.getConnection();
@@ -66,6 +67,22 @@ public enum UserRepository {
                             .build();
                 }
                 return Optional.ofNullable(user);
+            }
+        } catch (SQLException e) {
+            throw new UnableToExecuteQueryException(e.getMessage());
+        }
+    }
+
+    public Integer readUserIdByUuid(Object uuid) {
+        Integer id = null;
+        try (Connection conn= ConnectionPool.getConnection();
+        PreparedStatement ps= conn.prepareStatement("select * from users where uuid = ?")){
+            ps.setObject(1, uuid);
+            try (ResultSet rs= ps.executeQuery()){
+                while (rs.next()) {
+                    id = rs.getInt(ID);
+                }
+                return id;
             }
         } catch (SQLException e) {
             throw new UnableToExecuteQueryException(e.getMessage());

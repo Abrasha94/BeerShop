@@ -5,6 +5,6 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class UserRegistryResponse {
+public class RegistrationResponse {
     private final String uuid;
 }

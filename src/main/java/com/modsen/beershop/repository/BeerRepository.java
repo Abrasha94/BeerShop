@@ -1,9 +1,9 @@
 package com.modsen.beershop.repository;
 
 import com.modsen.beershop.controller.dto.AddBeerDto;
-import com.modsen.beershop.controller.request.AddBeerRequest;
+import com.modsen.beershop.model.Beer;
+import com.modsen.beershop.model.BeerDescription;
 import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
-import lombok.RequiredArgsConstructor;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -11,18 +11,29 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.IOException;
 import java.sql.*;
 import java.time.Instant;
+import java.util.Optional;
 
 public enum BeerRepository {
     INSTANCE;
 
-    private static final String SELECT_BEER_BY_ID = "select * from beers where id = ?";
     public static final String SELECT_BEER_BY_NAME_AND_CONTAINER =
             "select * from beers where name = ? and container = ?";
     public static final String CREATE_BEER =
             "insert into beers (name, container, type, abv, ibu, created, update, beer_description) " +
                     "values (?, ?, ?, ?, ?, ?, ?, to_json(?::json))";
+    public static final String UPDATE_BEER = "update beers set beer_description = to_json(?::json), update = ? " +
+            "where id = ?";
+    public static final String SELECT_BEER_BY_ID = "select * from beers where id = ?";
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String CONTAINER = "container";
+    public static final String TYPE = "type";
+    public static final String ABV = "abv";
+    public static final String IBU = "ibu";
+    public static final String BEER_DESCRIPTION = "beer_description";
+    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) where name = ? and container = ?";
 
-    private final ObjectMapper objectMapper=new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public boolean isExistBeerById(Integer id) {
         try (Connection conn = ConnectionPool.getConnection();
@@ -67,6 +78,56 @@ public enum BeerRepository {
                 }
                 return addBeerDto;
             }
+        } catch (SQLException | IOException e) {
+            throw new UnableToExecuteQueryException(e.getMessage());
+        }
+    }
+
+    public void updateBeerDescription(BeerDescription beerDescription, Integer id) {
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(UPDATE_BEER)) {
+            ps.setString(1, objectMapper.writeValueAsString(beerDescription));
+            ps.setTimestamp(2, Timestamp.from(Instant.now()));
+            ps.setInt(3, id);
+            ps.executeUpdate();
+        } catch (SQLException | IOException e) {
+            throw new UnableToExecuteQueryException(e.getMessage());
+        }
+    }
+
+    public <T> Optional<Beer> readBeerById(Integer id, Class<T> tClass) {
+        Beer beer = null;
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_BEER_BY_ID)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    beer = Beer.builder()
+                            .id(rs.getInt(ID))
+                            .name(rs.getString(NAME))
+                            .container(rs.getString(CONTAINER))
+                            .type(rs.getString(TYPE))
+                            .abv(rs.getDouble(ABV))
+                            .ibu(rs.getInt(IBU))
+                            .beerDescription((BeerDescription) objectMapper.readValue(rs.getString(BEER_DESCRIPTION), tClass))
+                            .build();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        } catch (SQLException e) {
+            throw new UnableToExecuteQueryException(e.getMessage());
+        }
+        return Optional.ofNullable(beer);
+    }
+
+    public void updateBeer(Beer beer) {
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(UPDATE_BEERS)) {
+            ps.setString(1, objectMapper.writeValueAsString(beer.getBeerDescription()));
+            ps.setString(2, beer.getName());
+            ps.setString(3, beer.getContainer());
+            ps.executeUpdate();
         } catch (SQLException | IOException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
         }

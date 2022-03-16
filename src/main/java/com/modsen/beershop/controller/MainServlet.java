@@ -1,18 +1,13 @@
 package com.modsen.beershop.controller;
 
-import com.modsen.beershop.controller.command.CreateBeerCommand;
+import com.modsen.beershop.controller.command.*;
 import com.modsen.beershop.controller.request.AddBeerRequest;
 import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.controller.request.RegistrationRequest;
-import com.modsen.beershop.controller.command.Command;
-import com.modsen.beershop.controller.command.LoginCommand;
-import com.modsen.beershop.controller.command.RegistrationCommand;
+import com.modsen.beershop.controller.request.UpdateBeerRequest;
 import com.modsen.beershop.model.BottleBeerDescription;
 import com.modsen.beershop.model.DraftBeerDescription;
-import com.modsen.beershop.service.CreateBeerService;
-import com.modsen.beershop.service.LoginService;
-import com.modsen.beershop.service.RegistrationService;
-import com.modsen.beershop.service.ResponseService;
+import com.modsen.beershop.service.*;
 import com.modsen.beershop.service.exceprion.CommandNotFoundException;
 import com.modsen.beershop.service.exceprion.ConfigurationException;
 import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
@@ -43,8 +38,12 @@ public class MainServlet extends HttpServlet {
     public static final String CONTAINER_VOLUME_IS_SMALL_ERROR = "Container volume is too small!";
     public static final String QUANTITY_OF_BOTTLE_IS_SMALL_ERROR = "Quantity of bottle is too small!";
     public static final String INCORRECT_CONTAINER_VOLUME_ERROR = "Incorrect container volume!";
+    public static final String ID_FIELD_IS_EMPTY = "Id field is empty!";
+    public static final String CONTAINER_VOLUME_FIELD_IS_EMPTY = "Container volume field is empty!";
+    public static final String QUANTITY_FIELD_IS_EMPTY = "Quantity field is empty!";
 
     private List<Command> postCommands;
+    private List<Command> putCommands;
 
     @Override
     public void init() throws ServletException {
@@ -72,16 +71,21 @@ public class MainServlet extends HttpServlet {
                                 new FieldValidator<>(AddBeerRequest::getIbu, IBU_FIELD_IS_EMPTY),
                                 new ContainerValidator(),
                                 new AbvValidator(),
-                                new IbuValidator()
-                        ), List.of(
+                                new IbuValidator()),
+                                List.of(
                                 new DraftBeerVerifier(List.of(
-                                        new FieldValidator<>(DraftBeerDescription::getQuantity, QUANTITY_OF_DRAFT_BEER_ERROR)
-                                )),
+                                        new FieldValidator<>(DraftBeerDescription::getQuantity, QUANTITY_OF_DRAFT_BEER_ERROR))),
                                 new BottleBeerVerifier(List.of(
                                         new FieldValidator<>(BottleBeerDescription::getContainerVolume, CONTAINER_VOLUME_IS_SMALL_ERROR),
                                         new FieldValidator<>(BottleBeerDescription::getQuantity, QUANTITY_OF_BOTTLE_IS_SMALL_ERROR),
-                                        new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)
-                                ))))));
+                                        new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))));
+        putCommands = List.of(
+                new UpdateBeerCommand(objectMapper,
+                        new UpdateBeerService(List.of(
+                                new FieldValidator<>(UpdateBeerRequest::getId, ID_FIELD_IS_EMPTY),
+                                new FieldValidator<>(UpdateBeerRequest::getContainerVolume, CONTAINER_VOLUME_FIELD_IS_EMPTY),
+                                new FieldValidator<>(UpdateBeerRequest::getQuantity, QUANTITY_FIELD_IS_EMPTY),
+                                new ContainerVolumeValidator<>(UpdateBeerRequest::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))));
     }
 
     @Override
@@ -90,8 +94,16 @@ public class MainServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doPut(req, resp);
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            final Command command = putCommands.stream()
+                    .filter(c -> c.filter(request))
+                    .findFirst()
+                    .orElseThrow(() -> new CommandNotFoundException(COMMAND_NOT_FOUND_MESSAGE));
+            command.execute(request, response);
+        } catch (CommandNotFoundException | UnableToExecuteQueryException | ConfigurationException | IOException e) {
+            ResponseService.INSTANCE.send(response, e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
