@@ -6,13 +6,17 @@ import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.controller.request.RegistrationRequest;
 import com.modsen.beershop.controller.request.UpdateBeerRequest;
 import com.modsen.beershop.model.BottleBeerDescription;
+import com.modsen.beershop.model.BottleBeerOrder;
 import com.modsen.beershop.model.DraftBeerDescription;
+import com.modsen.beershop.model.DraftBeerOrder;
 import com.modsen.beershop.service.*;
 import com.modsen.beershop.service.exceprion.CommandNotFoundException;
 import com.modsen.beershop.service.exceprion.ConfigurationException;
 import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
 import com.modsen.beershop.service.validator.*;
+import com.modsen.beershop.service.validator.verifier.BottleBeerOrderVerifier;
 import com.modsen.beershop.service.validator.verifier.BottleBeerVerifier;
+import com.modsen.beershop.service.validator.verifier.DraftBeerOrderVerifier;
 import com.modsen.beershop.service.validator.verifier.DraftBeerVerifier;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -41,6 +45,8 @@ public class MainServlet extends HttpServlet {
     public static final String ID_FIELD_IS_EMPTY = "Id field is empty!";
     public static final String CONTAINER_VOLUME_FIELD_IS_EMPTY = "Container volume field is empty!";
     public static final String QUANTITY_FIELD_IS_EMPTY = "Quantity field is empty!";
+    public static final String ID_IS_NULL = "Id is null!";
+    public static final String QUANTITY_IS_NULL = "Quantity is null!";
 
     private List<Command> postCommands;
     private List<Command> putCommands;
@@ -78,7 +84,19 @@ public class MainServlet extends HttpServlet {
                                 new BottleBeerVerifier(List.of(
                                         new FieldValidator<>(BottleBeerDescription::getContainerVolume, CONTAINER_VOLUME_IS_SMALL_ERROR),
                                         new FieldValidator<>(BottleBeerDescription::getQuantity, QUANTITY_OF_BOTTLE_IS_SMALL_ERROR),
-                                        new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))));
+                                        new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))),
+                new BuyBeerCommand(objectMapper,
+                        new BuyBeerService(List.of(
+                                new BottleBeerOrderValidatorVerifier(List.of(
+                                        new FieldValidator<>(BottleBeerOrder::getId, ID_IS_NULL),
+                                        new FieldValidator<>(BottleBeerOrder::getQuantity, QUANTITY_IS_NULL)
+                                )),
+                                new DraftBeerOrderValidatorVerifier(List.of(
+                                        new FieldValidator<>(DraftBeerOrder::getId, ID_IS_NULL),
+                                        new FieldValidator<>(DraftBeerOrder::getQuantity, QUANTITY_IS_NULL)
+                                ))), List.of(
+                                new BottleBeerOrderVerifier(),
+                                new DraftBeerOrderVerifier()))));
         putCommands = List.of(
                 new UpdateBeerCommand(objectMapper,
                         new UpdateBeerService(List.of(
