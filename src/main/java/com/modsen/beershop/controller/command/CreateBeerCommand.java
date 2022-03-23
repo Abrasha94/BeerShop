@@ -1,6 +1,6 @@
 package com.modsen.beershop.controller.command;
 
-import com.modsen.beershop.controller.request.AddBeerRequest;
+import com.modsen.beershop.controller.request.CreateBeerRequest;
 import com.modsen.beershop.controller.response.AddBeerResponse;
 import com.modsen.beershop.service.CreateBeerService;
 import com.modsen.beershop.service.ResponseService;
@@ -24,10 +24,10 @@ public class CreateBeerCommand implements Command {
 
     @Override
     public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
-        final AddBeerRequest addBeerRequest = objectMapper.readValue(httpServletRequest.getInputStream(),
-                AddBeerRequest.class);
+        final CreateBeerRequest createBeerRequest = objectMapper.readValue(httpServletRequest.getInputStream(),
+                CreateBeerRequest.class);
         try {
-            final AddBeerResponse addBeerResponse = createBeerService.create(addBeerRequest);
+            final AddBeerResponse addBeerResponse = createBeerService.create(createBeerRequest);
             ResponseService.INSTANCE.send(httpServletResponse, addBeerResponse, HttpServletResponse.SC_OK);
         } catch (BeerExistException | BeerVerifierNotFoundException | ValidateException | IOException e) {
             ResponseService.INSTANCE.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);

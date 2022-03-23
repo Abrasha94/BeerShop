@@ -1,7 +1,7 @@
 package com.modsen.beershop.controller;
 
 import com.modsen.beershop.controller.command.*;
-import com.modsen.beershop.controller.request.AddBeerRequest;
+import com.modsen.beershop.controller.request.CreateBeerRequest;
 import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.controller.request.RegistrationRequest;
 import com.modsen.beershop.controller.request.UpdateBeerRequest;
@@ -50,6 +50,7 @@ public class MainServlet extends HttpServlet {
 
     private List<Command> postCommands;
     private List<Command> putCommands;
+    private List<Command> getCommands;
 
     @Override
     public void init() throws ServletException {
@@ -70,21 +71,21 @@ public class MainServlet extends HttpServlet {
                                 new EmailValidator()))),
                 new CreateBeerCommand(objectMapper,
                         new CreateBeerService(List.of(
-                                new FieldValidator<>(AddBeerRequest::getName, NAME_FIELD_IS_EMPTY),
-                                new FieldValidator<>(AddBeerRequest::getContainer, CONTAINER_FIELD_IS_EMPTY),
-                                new FieldValidator<>(AddBeerRequest::getType, TYPE_FIELD_IS_EMPTY),
-                                new FieldValidator<>(AddBeerRequest::getAbv, ABV_FIELD_IS_EMPTY),
-                                new FieldValidator<>(AddBeerRequest::getIbu, IBU_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getName, NAME_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getContainer, CONTAINER_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getType, TYPE_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getAbv, ABV_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getIbu, IBU_FIELD_IS_EMPTY),
                                 new ContainerValidator(),
                                 new AbvValidator(),
                                 new IbuValidator()),
                                 List.of(
-                                new DraftBeerVerifier(List.of(
-                                        new FieldValidator<>(DraftBeerDescription::getQuantity, QUANTITY_OF_DRAFT_BEER_ERROR))),
-                                new BottleBeerVerifier(List.of(
-                                        new FieldValidator<>(BottleBeerDescription::getContainerVolume, CONTAINER_VOLUME_IS_SMALL_ERROR),
-                                        new FieldValidator<>(BottleBeerDescription::getQuantity, QUANTITY_OF_BOTTLE_IS_SMALL_ERROR),
-                                        new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))),
+                                        new DraftBeerVerifier(List.of(
+                                                new FieldValidator<>(DraftBeerDescription::getQuantity, QUANTITY_OF_DRAFT_BEER_ERROR))),
+                                        new BottleBeerVerifier(List.of(
+                                                new FieldValidator<>(BottleBeerDescription::getContainerVolume, CONTAINER_VOLUME_IS_SMALL_ERROR),
+                                                new FieldValidator<>(BottleBeerDescription::getQuantity, QUANTITY_OF_BOTTLE_IS_SMALL_ERROR),
+                                                new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))),
                 new BuyBeerCommand(objectMapper,
                         new BuyBeerService(List.of(
                                 new BottleBeerOrderValidatorVerifier(List.of(
@@ -104,11 +105,20 @@ public class MainServlet extends HttpServlet {
                                 new FieldValidator<>(UpdateBeerRequest::getContainerVolume, CONTAINER_VOLUME_FIELD_IS_EMPTY),
                                 new FieldValidator<>(UpdateBeerRequest::getQuantity, QUANTITY_FIELD_IS_EMPTY),
                                 new ContainerVolumeValidator<>(UpdateBeerRequest::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))));
+        getCommands = List.of(new ReadUserHistoryCommand(), new ReadAllUsersHistoryCommand(), new ListOfAvailableBeersCommand());
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        try {
+            final Command command = getCommands.stream()
+                    .filter(c -> c.filter(request))
+                    .findFirst()
+                    .orElseThrow(() -> new CommandNotFoundException(COMMAND_NOT_FOUND_MESSAGE));
+            command.execute(request, response);
+        } catch (CommandNotFoundException | UnableToExecuteQueryException | ConfigurationException | IOException e) {
+            ResponseService.INSTANCE.send(response, e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

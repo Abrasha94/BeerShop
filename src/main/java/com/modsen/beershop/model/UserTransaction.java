@@ -11,4 +11,6 @@ public class UserTransaction {
     private Integer userId;
     private Integer beerId;
     private Instant timeOfSale;
+
+    private Object quantity;
 }

@@ -6,7 +6,6 @@ import com.modsen.beershop.repository.BeerRepository;
 import com.modsen.beershop.repository.UserRepository;
 import com.modsen.beershop.repository.UserTransactionRepository;
 import com.modsen.beershop.service.exceprion.ValidateException;
-import com.modsen.beershop.service.validator.Validator;
 import com.modsen.beershop.service.validator.verifier.Verifier;
 import lombok.RequiredArgsConstructor;
 
@@ -33,7 +32,7 @@ public class BuyBeerService {
         verifiers.stream().filter(v -> v.filter(buyBeerRequest)).map(v -> v.verify(buyBeerRequest)).flatMap(Collection::stream).forEach(buyBeerDto -> {
             BeerRepository.INSTANCE.updateBeer(buyBeerDto.getBeer());
             buyBeerDto.setUserId(UserRepository.INSTANCE.readUserIdByUuid(uuid));
-            UserTransactionRepository.INSTANCE.save(buyBeerDto);
+            UserTransactionRepository.INSTANCE.create(buyBeerDto);
         });
     }
 }

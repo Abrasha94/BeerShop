@@ -11,6 +11,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.IOException;
 import java.sql.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public enum BeerRepository {
@@ -31,7 +33,11 @@ public enum BeerRepository {
     public static final String ABV = "abv";
     public static final String IBU = "ibu";
     public static final String BEER_DESCRIPTION = "beer_description";
-    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) where name = ? and container = ?";
+    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) " +
+            "where name = ? and container = ?";
+    public static final String SELECT_ACTIVE_BEERS = "select * from beers where id " +
+            "not in (select id from beers where beer_description::jsonb @> '{\"quantity\" : 0}' " +
+            "or beer_description::jsonb @> '{\"quantity\" : 0.0}') order by id limit ? offset ?";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -131,6 +137,25 @@ public enum BeerRepository {
         } catch (SQLException | IOException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
         }
+    }
+
+    public List<Beer> readActiveBeers(Integer pageSize, Integer page) {
+        List<Beer> beers = new ArrayList<>();
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_ACTIVE_BEERS)) {
+            ps.setInt(1, pageSize);
+            ps.setInt(2, pageSize * (page - 1));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    beers.add(Beer.builder()
+                            .id(rs.getInt(ID))
+                            .build());
+                }
+            }
+        } catch (SQLException e) {
+            throw new UnableToExecuteQueryException(e.getMessage());
+        }
+        return beers;
     }
 
 }
