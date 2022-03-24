@@ -3,8 +3,6 @@ package com.modsen.beershop.repository;
 import com.modsen.beershop.controller.dto.BuyBeerDto;
 import com.modsen.beershop.model.UserTransaction;
 import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
-import com.modsen.beershop.service.exception.UnableToGetPreparedStatementException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.sql.*;
@@ -12,6 +10,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 
 public enum UserTransactionRepository {
     INSTANCE;
@@ -26,7 +26,6 @@ public enum UserTransactionRepository {
     public static final String TIME_OF_SALE = "time_of_sale";
     public static final String QUANTITY = "quantity";
     public static final String USER_UUID = "user_uuid";
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void create(BuyBeerDto buyBeerDto) {
         try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(INSERT_INTO_USERS_TRANSACTIONS)) {

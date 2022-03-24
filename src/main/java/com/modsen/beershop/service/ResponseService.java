@@ -1,18 +1,17 @@
 package com.modsen.beershop.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.MediaType;
-import java.awt.*;
 import java.io.IOException;
+
+import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 
 public enum ResponseService {
     INSTANCE;
 
     private static final String HEADER = "Content-type";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public void create(HttpServletResponse httpServletResponse, Object dto, Integer code) throws IOException {

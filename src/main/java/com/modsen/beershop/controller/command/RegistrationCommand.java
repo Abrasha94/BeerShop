@@ -9,16 +9,16 @@ import com.modsen.beershop.service.exception.ValidateException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.util.UUID;
+
+import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 
 @RequiredArgsConstructor
 public class RegistrationCommand implements Command {
 
     public static final String REGISTRATION = "/registration";
-    private final ObjectMapper objectMapper;
     private final RegistrationService registrationService;
 
     @Override

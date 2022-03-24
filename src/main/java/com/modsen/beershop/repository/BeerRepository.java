@@ -4,8 +4,6 @@ import com.modsen.beershop.controller.dto.AddBeerDto;
 import com.modsen.beershop.model.Beer;
 import com.modsen.beershop.model.BeerDescription;
 import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
-import com.modsen.beershop.service.exception.UnableToGetPreparedStatementException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.sql.*;
@@ -13,6 +11,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 
 public enum BeerRepository {
     INSTANCE;
@@ -38,7 +38,6 @@ public enum BeerRepository {
     public static final String IBU = "ibu";
     public static final String BEER_DESCRIPTION = "beer_description";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public boolean isExistBeerById(Integer id) {
         try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_BEER_BY_ID)) {

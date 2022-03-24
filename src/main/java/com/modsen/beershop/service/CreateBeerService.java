@@ -11,7 +11,6 @@ import com.modsen.beershop.service.validator.Validator;
 import com.modsen.beershop.service.validator.verifier.Verifier;
 import lombok.RequiredArgsConstructor;
 
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @RequiredArgsConstructor

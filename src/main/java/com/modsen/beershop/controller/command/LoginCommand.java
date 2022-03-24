@@ -8,9 +8,10 @@ import com.modsen.beershop.service.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+
+import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 
 @RequiredArgsConstructor
 public class LoginCommand implements Command {
@@ -23,7 +24,6 @@ public class LoginCommand implements Command {
     public static final String HELLO_ADMIN_MESSAGE = "Hello Admin";
     public static final String LOGIN = "/login";
 
-    private final ObjectMapper objectMapper;
     private final LoginService loginService;
 
     @Override

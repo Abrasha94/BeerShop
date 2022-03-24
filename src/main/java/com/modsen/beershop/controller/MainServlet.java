@@ -47,21 +47,20 @@ public class MainServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        final ObjectMapper objectMapper = new ObjectMapper();
 
         postCommands = List.of(
-                new LoginCommand(objectMapper,
+                new LoginCommand(
                         new LoginService(List.of(
                                 new FieldValidator<>(LoginRequest::getLogin, Messages.MESSAGE.loginEmpty()),
                                 new FieldValidator<>(LoginRequest::getPassword, Messages.MESSAGE.passwordEmpty())))),
-                new RegistrationCommand(objectMapper,
+                new RegistrationCommand(
                         new RegistrationService(List.of(
                                 new FieldValidator<>(RegistrationRequest::getLogin, Messages.MESSAGE.loginEmpty()),
                                 new FieldValidator<>(RegistrationRequest::getPassword, Messages.MESSAGE.passwordEmpty()),
                                 new FieldValidator<>(RegistrationRequest::getEmail, Messages.MESSAGE.emailEmpty()),
                                 new LoginValidator(),
                                 new EmailValidator()))),
-                new CreateBeerCommand(objectMapper,
+                new CreateBeerCommand(
                         new CreateBeerService(List.of(
                                 new FieldValidator<>(CreateBeerRequest::getName, Messages.MESSAGE.nameEmpty()),
                                 new FieldValidator<>(CreateBeerRequest::getContainer, Messages.MESSAGE.containerEmpty()),
@@ -78,7 +77,7 @@ public class MainServlet extends HttpServlet {
                                                 new FieldValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.volumeSmall()),
                                                 new FieldValidator<>(BottleBeerDescription::getQuantity, Messages.MESSAGE.bottleQuantitySmall()),
                                                 new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.incorrectVolume())))))),
-                new BuyBeerCommand(objectMapper,
+                new BuyBeerCommand(
                         new BuyBeerService(List.of(
                                 new BottleBeerOrderValidatorVerifier(List.of(
                                         new FieldValidator<>(BottleBeerOrder::getId, Messages.MESSAGE.idNull()),
@@ -91,7 +90,7 @@ public class MainServlet extends HttpServlet {
                                 new BottleBeerOrderVerifier(),
                                 new DraftBeerOrderVerifier()))));
         putCommands = List.of(
-                new UpdateBeerCommand(objectMapper,
+                new UpdateBeerCommand(
                         new UpdateBeerService(List.of(
                                 new FieldValidator<>(UpdateBeerRequest::getId, Messages.MESSAGE.beerIdEmpty()),
                                 new FieldValidator<>(UpdateBeerRequest::getContainerVolume, Messages.MESSAGE.volumeEmpty()),

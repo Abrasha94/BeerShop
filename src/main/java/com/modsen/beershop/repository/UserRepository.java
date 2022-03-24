@@ -2,9 +2,7 @@ package com.modsen.beershop.repository;
 
 import com.modsen.beershop.model.User;
 import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
-import com.modsen.beershop.service.exception.UnableToGetPreparedStatementException;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
