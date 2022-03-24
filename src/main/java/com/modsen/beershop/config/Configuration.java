@@ -1,6 +1,6 @@
-package com.modsen.beershop.repository.config;
+package com.modsen.beershop.config;
 
-import com.modsen.beershop.service.exceprion.ConfigurationException;
+import com.modsen.beershop.service.exception.ConfigurationException;
 
 import java.io.FileInputStream;
 import java.io.IOException;

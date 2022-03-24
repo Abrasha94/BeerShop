@@ -3,9 +3,8 @@ package com.modsen.beershop.repository;
 import com.modsen.beershop.controller.dto.AddBeerDto;
 import com.modsen.beershop.model.Beer;
 import com.modsen.beershop.model.BeerDescription;
-import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
+import com.modsen.beershop.service.exception.UnableToGetPreparedStatementException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -20,12 +19,17 @@ public enum BeerRepository {
 
     public static final String SELECT_BEER_BY_NAME_AND_CONTAINER =
             "select * from beers where name = ? and container = ?";
+    public static final String SELECT_BEER_BY_ID = "select * from beers where id = ?";
+    public static final String SELECT_ACTIVE_BEERS = "select * from beers where id " +
+            "not in (select id from beers where beer_description::jsonb @> '{\"quantity\" : 0}' " +
+            "or beer_description::jsonb @> '{\"quantity\" : 0.0}') order by id limit ? offset ?";
     public static final String CREATE_BEER =
             "insert into beers (name, container, type, abv, ibu, created, update, beer_description) " +
                     "values (?, ?, ?, ?, ?, ?, ?, to_json(?::json))";
     public static final String UPDATE_BEER = "update beers set beer_description = to_json(?::json), update = ? " +
             "where id = ?";
-    public static final String SELECT_BEER_BY_ID = "select * from beers where id = ?";
+    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) " +
+            "where name = ? and container = ?";
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String CONTAINER = "container";
@@ -33,17 +37,11 @@ public enum BeerRepository {
     public static final String ABV = "abv";
     public static final String IBU = "ibu";
     public static final String BEER_DESCRIPTION = "beer_description";
-    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) " +
-            "where name = ? and container = ?";
-    public static final String SELECT_ACTIVE_BEERS = "select * from beers where id " +
-            "not in (select id from beers where beer_description::jsonb @> '{\"quantity\" : 0}' " +
-            "or beer_description::jsonb @> '{\"quantity\" : 0.0}') order by id limit ? offset ?";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public boolean isExistBeerById(Integer id) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_BEER_BY_ID)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_BEER_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -54,8 +52,7 @@ public enum BeerRepository {
     }
 
     public boolean isExistBeerByNameAndContainer(String name, String container) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_BEER_BY_NAME_AND_CONTAINER)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_BEER_BY_NAME_AND_CONTAINER)) {
             ps.setString(1, name);
             ps.setString(2, container);
             try (ResultSet rs = ps.executeQuery()) {
@@ -67,8 +64,7 @@ public enum BeerRepository {
     }
 
     public AddBeerDto createBeer(AddBeerDto addBeerDto) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(CREATE_BEER)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(CREATE_BEER)) {
             ps.setString(1, addBeerDto.getName());
             ps.setString(2, addBeerDto.getContainer());
             ps.setString(3, addBeerDto.getType());
@@ -90,8 +86,7 @@ public enum BeerRepository {
     }
 
     public void updateBeerDescription(BeerDescription beerDescription, Integer id) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(UPDATE_BEER)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEER)) {
             ps.setString(1, objectMapper.writeValueAsString(beerDescription));
             ps.setTimestamp(2, Timestamp.from(Instant.now()));
             ps.setInt(3, id);
@@ -103,8 +98,7 @@ public enum BeerRepository {
 
     public <T> Optional<Beer> readBeerById(Integer id, Class<T> tClass) {
         Beer beer = null;
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_BEER_BY_ID)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_BEER_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -128,8 +122,7 @@ public enum BeerRepository {
     }
 
     public void updateBeer(Beer beer) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(UPDATE_BEERS)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEERS)) {
             ps.setString(1, objectMapper.writeValueAsString(beer.getBeerDescription()));
             ps.setString(2, beer.getName());
             ps.setString(3, beer.getContainer());
@@ -141,8 +134,7 @@ public enum BeerRepository {
 
     public List<Beer> readActiveBeers(Integer pageSize, Integer page) {
         List<Beer> beers = new ArrayList<>();
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_ACTIVE_BEERS)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_ACTIVE_BEERS)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, pageSize * (page - 1));
             try (ResultSet rs = ps.executeQuery()) {

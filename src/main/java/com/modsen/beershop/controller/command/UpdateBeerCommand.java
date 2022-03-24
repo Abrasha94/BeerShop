@@ -4,7 +4,7 @@ import com.modsen.beershop.controller.request.UpdateBeerRequest;
 import com.modsen.beershop.controller.response.UpdateBeerResponse;
 import com.modsen.beershop.service.ResponseService;
 import com.modsen.beershop.service.UpdateBeerService;
-import com.modsen.beershop.service.exceprion.BeerNotFoundException;
+import com.modsen.beershop.service.exception.BeerNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

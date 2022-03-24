@@ -1,6 +1,6 @@
 package com.modsen.beershop.service;
 
-import com.modsen.beershop.service.exceprion.ValidateException;
+import com.modsen.beershop.service.exception.ValidateException;
 import com.modsen.beershop.service.validator.Validator;
 
 import java.util.List;

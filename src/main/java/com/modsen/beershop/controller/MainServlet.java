@@ -1,6 +1,15 @@
 package com.modsen.beershop.controller;
 
-import com.modsen.beershop.controller.command.*;
+import com.modsen.beershop.config.Messages;
+import com.modsen.beershop.controller.command.BuyBeerCommand;
+import com.modsen.beershop.controller.command.Command;
+import com.modsen.beershop.controller.command.CreateBeerCommand;
+import com.modsen.beershop.controller.command.ListOfAvailableBeersCommand;
+import com.modsen.beershop.controller.command.LoginCommand;
+import com.modsen.beershop.controller.command.ReadAllUsersHistoryCommand;
+import com.modsen.beershop.controller.command.ReadUserHistoryCommand;
+import com.modsen.beershop.controller.command.RegistrationCommand;
+import com.modsen.beershop.controller.command.UpdateBeerCommand;
 import com.modsen.beershop.controller.request.CreateBeerRequest;
 import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.controller.request.RegistrationRequest;
@@ -10,17 +19,19 @@ import com.modsen.beershop.model.BottleBeerOrder;
 import com.modsen.beershop.model.DraftBeerDescription;
 import com.modsen.beershop.model.DraftBeerOrder;
 import com.modsen.beershop.service.*;
-import com.modsen.beershop.service.exceprion.CommandNotFoundException;
-import com.modsen.beershop.service.exceprion.ConfigurationException;
-import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
+import com.modsen.beershop.service.exception.CommandNotFoundException;
+import com.modsen.beershop.service.exception.ConfigurationException;
+import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
 import com.modsen.beershop.service.validator.*;
 import com.modsen.beershop.service.validator.verifier.BottleBeerOrderVerifier;
 import com.modsen.beershop.service.validator.verifier.BottleBeerVerifier;
 import com.modsen.beershop.service.validator.verifier.DraftBeerOrderVerifier;
 import com.modsen.beershop.service.validator.verifier.DraftBeerVerifier;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -28,25 +39,6 @@ import java.util.List;
 
 @WebServlet(name = "MainServlet", value = "/MainServlet")
 public class MainServlet extends HttpServlet {
-
-    public static final String LOGIN_IS_EMPTY = "Login is empty!";
-    public static final String PASSWORD_IS_EMPTY = "Password is empty!";
-    public static final String EMAIL_IS_EMPTY = "Email is empty!";
-    public static final String COMMAND_NOT_FOUND_MESSAGE = "Command not found!";
-    public static final String NAME_FIELD_IS_EMPTY = "Name field is empty!";
-    public static final String CONTAINER_FIELD_IS_EMPTY = "Container field is empty!";
-    public static final String TYPE_FIELD_IS_EMPTY = "Type field is empty!";
-    public static final String ABV_FIELD_IS_EMPTY = "ABV field is empty!";
-    public static final String IBU_FIELD_IS_EMPTY = "IBU field is empty!";
-    public static final String QUANTITY_OF_DRAFT_BEER_ERROR = "Quantity of draft beer is too small!";
-    public static final String CONTAINER_VOLUME_IS_SMALL_ERROR = "Container volume is too small!";
-    public static final String QUANTITY_OF_BOTTLE_IS_SMALL_ERROR = "Quantity of bottle is too small!";
-    public static final String INCORRECT_CONTAINER_VOLUME_ERROR = "Incorrect container volume!";
-    public static final String ID_FIELD_IS_EMPTY = "Id field is empty!";
-    public static final String CONTAINER_VOLUME_FIELD_IS_EMPTY = "Container volume field is empty!";
-    public static final String QUANTITY_FIELD_IS_EMPTY = "Quantity field is empty!";
-    public static final String ID_IS_NULL = "Id is null!";
-    public static final String QUANTITY_IS_NULL = "Quantity is null!";
 
     private List<Command> postCommands;
     private List<Command> putCommands;
@@ -60,51 +52,51 @@ public class MainServlet extends HttpServlet {
         postCommands = List.of(
                 new LoginCommand(objectMapper,
                         new LoginService(List.of(
-                                new FieldValidator<>(LoginRequest::getLogin, LOGIN_IS_EMPTY),
-                                new FieldValidator<>(LoginRequest::getPassword, PASSWORD_IS_EMPTY)))),
+                                new FieldValidator<>(LoginRequest::getLogin, Messages.MESSAGE.loginEmpty()),
+                                new FieldValidator<>(LoginRequest::getPassword, Messages.MESSAGE.passwordEmpty())))),
                 new RegistrationCommand(objectMapper,
                         new RegistrationService(List.of(
-                                new FieldValidator<>(RegistrationRequest::getLogin, LOGIN_IS_EMPTY),
-                                new FieldValidator<>(RegistrationRequest::getPassword, PASSWORD_IS_EMPTY),
-                                new FieldValidator<>(RegistrationRequest::getEmail, EMAIL_IS_EMPTY),
+                                new FieldValidator<>(RegistrationRequest::getLogin, Messages.MESSAGE.loginEmpty()),
+                                new FieldValidator<>(RegistrationRequest::getPassword, Messages.MESSAGE.passwordEmpty()),
+                                new FieldValidator<>(RegistrationRequest::getEmail, Messages.MESSAGE.emailEmpty()),
                                 new LoginValidator(),
                                 new EmailValidator()))),
                 new CreateBeerCommand(objectMapper,
                         new CreateBeerService(List.of(
-                                new FieldValidator<>(CreateBeerRequest::getName, NAME_FIELD_IS_EMPTY),
-                                new FieldValidator<>(CreateBeerRequest::getContainer, CONTAINER_FIELD_IS_EMPTY),
-                                new FieldValidator<>(CreateBeerRequest::getType, TYPE_FIELD_IS_EMPTY),
-                                new FieldValidator<>(CreateBeerRequest::getAbv, ABV_FIELD_IS_EMPTY),
-                                new FieldValidator<>(CreateBeerRequest::getIbu, IBU_FIELD_IS_EMPTY),
+                                new FieldValidator<>(CreateBeerRequest::getName, Messages.MESSAGE.nameEmpty()),
+                                new FieldValidator<>(CreateBeerRequest::getContainer, Messages.MESSAGE.containerEmpty()),
+                                new FieldValidator<>(CreateBeerRequest::getType, Messages.MESSAGE.typeEmpty()),
+                                new FieldValidator<>(CreateBeerRequest::getAbv, Messages.MESSAGE.abvEmpty()),
+                                new FieldValidator<>(CreateBeerRequest::getIbu, Messages.MESSAGE.ibuEmpty()),
                                 new ContainerValidator(),
                                 new AbvValidator(),
                                 new IbuValidator()),
                                 List.of(
                                         new DraftBeerVerifier(List.of(
-                                                new FieldValidator<>(DraftBeerDescription::getQuantity, QUANTITY_OF_DRAFT_BEER_ERROR))),
+                                                new FieldValidator<>(DraftBeerDescription::getQuantity, Messages.MESSAGE.quantitySmall()))),
                                         new BottleBeerVerifier(List.of(
-                                                new FieldValidator<>(BottleBeerDescription::getContainerVolume, CONTAINER_VOLUME_IS_SMALL_ERROR),
-                                                new FieldValidator<>(BottleBeerDescription::getQuantity, QUANTITY_OF_BOTTLE_IS_SMALL_ERROR),
-                                                new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))))),
+                                                new FieldValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.volumeSmall()),
+                                                new FieldValidator<>(BottleBeerDescription::getQuantity, Messages.MESSAGE.bottleQuantitySmall()),
+                                                new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.incorrectVolume())))))),
                 new BuyBeerCommand(objectMapper,
                         new BuyBeerService(List.of(
                                 new BottleBeerOrderValidatorVerifier(List.of(
-                                        new FieldValidator<>(BottleBeerOrder::getId, ID_IS_NULL),
-                                        new FieldValidator<>(BottleBeerOrder::getQuantity, QUANTITY_IS_NULL)
+                                        new FieldValidator<>(BottleBeerOrder::getId, Messages.MESSAGE.idNull()),
+                                        new FieldValidator<>(BottleBeerOrder::getQuantity, Messages.MESSAGE.quantityNull())
                                 )),
                                 new DraftBeerOrderValidatorVerifier(List.of(
-                                        new FieldValidator<>(DraftBeerOrder::getId, ID_IS_NULL),
-                                        new FieldValidator<>(DraftBeerOrder::getQuantity, QUANTITY_IS_NULL)
+                                        new FieldValidator<>(DraftBeerOrder::getId, Messages.MESSAGE.idNull()),
+                                        new FieldValidator<>(DraftBeerOrder::getQuantity, Messages.MESSAGE.quantityNull())
                                 ))), List.of(
                                 new BottleBeerOrderVerifier(),
                                 new DraftBeerOrderVerifier()))));
         putCommands = List.of(
                 new UpdateBeerCommand(objectMapper,
                         new UpdateBeerService(List.of(
-                                new FieldValidator<>(UpdateBeerRequest::getId, ID_FIELD_IS_EMPTY),
-                                new FieldValidator<>(UpdateBeerRequest::getContainerVolume, CONTAINER_VOLUME_FIELD_IS_EMPTY),
-                                new FieldValidator<>(UpdateBeerRequest::getQuantity, QUANTITY_FIELD_IS_EMPTY),
-                                new ContainerVolumeValidator<>(UpdateBeerRequest::getContainerVolume, INCORRECT_CONTAINER_VOLUME_ERROR)))));
+                                new FieldValidator<>(UpdateBeerRequest::getId, Messages.MESSAGE.beerIdEmpty()),
+                                new FieldValidator<>(UpdateBeerRequest::getContainerVolume, Messages.MESSAGE.volumeEmpty()),
+                                new FieldValidator<>(UpdateBeerRequest::getQuantity, Messages.MESSAGE.quantityEmpty()),
+                                new ContainerVolumeValidator<>(UpdateBeerRequest::getContainerVolume, Messages.MESSAGE.incorrectVolume())))));
         getCommands = List.of(new ReadUserHistoryCommand(), new ReadAllUsersHistoryCommand(), new ListOfAvailableBeersCommand());
     }
 
@@ -114,7 +106,7 @@ public class MainServlet extends HttpServlet {
             final Command command = getCommands.stream()
                     .filter(c -> c.filter(request))
                     .findFirst()
-                    .orElseThrow(() -> new CommandNotFoundException(COMMAND_NOT_FOUND_MESSAGE));
+                    .orElseThrow(() -> new CommandNotFoundException(Messages.MESSAGE.commandNotFound()));
             command.execute(request, response);
         } catch (CommandNotFoundException | UnableToExecuteQueryException | ConfigurationException | IOException e) {
             ResponseService.INSTANCE.send(response, e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -127,7 +119,7 @@ public class MainServlet extends HttpServlet {
             final Command command = putCommands.stream()
                     .filter(c -> c.filter(request))
                     .findFirst()
-                    .orElseThrow(() -> new CommandNotFoundException(COMMAND_NOT_FOUND_MESSAGE));
+                    .orElseThrow(() -> new CommandNotFoundException(Messages.MESSAGE.commandNotFound()));
             command.execute(request, response);
         } catch (CommandNotFoundException | UnableToExecuteQueryException | ConfigurationException | IOException e) {
             ResponseService.INSTANCE.send(response, e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -140,7 +132,7 @@ public class MainServlet extends HttpServlet {
             final Command command = postCommands.stream()
                     .filter(c -> c.filter(request))
                     .findFirst()
-                    .orElseThrow(() -> new CommandNotFoundException(COMMAND_NOT_FOUND_MESSAGE));
+                    .orElseThrow(() -> new CommandNotFoundException(Messages.MESSAGE.commandNotFound()));
             command.execute(request, response);
         } catch (CommandNotFoundException | UnableToExecuteQueryException | ConfigurationException e) {
             ResponseService.INSTANCE.send(response, e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

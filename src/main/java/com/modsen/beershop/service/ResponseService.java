@@ -3,13 +3,14 @@ package com.modsen.beershop.service;
 import jakarta.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.core.MediaType;
+import java.awt.*;
 import java.io.IOException;
 
 public enum ResponseService {
     INSTANCE;
 
     private static final String HEADER = "Content-type";
-    private static final String CONTENT_TYPE = "application/json";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -18,7 +19,7 @@ public enum ResponseService {
         final String jsonValue = objectMapper.writeValueAsString(dto);
         httpServletResponse.resetBuffer();
         httpServletResponse.setStatus(code);
-        httpServletResponse.setHeader(HEADER, CONTENT_TYPE);
+        httpServletResponse.setHeader(HEADER, MediaType.APPLICATION_JSON);
         httpServletResponse.getOutputStream().print(jsonValue);
         httpServletResponse.flushBuffer();
     }

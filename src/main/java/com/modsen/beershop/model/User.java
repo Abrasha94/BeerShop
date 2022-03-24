@@ -3,6 +3,8 @@ package com.modsen.beershop.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Builder(toBuilder = true)
 public class User {
@@ -10,5 +12,5 @@ public class User {
     private String login;
     private String pass;
     private String email;
-    private String uuid;
+    private UUID uuid;
 }

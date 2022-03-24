@@ -3,8 +3,8 @@ create table users_transactions
     id           serial not null
         constraint users_transactions_pk
             primary key,
-    user_id      int
-        constraint users_transactions_users_id_fk
+    user_uuid      uuid
+        constraint users_transactions_users_uuid_fk
             references users,
     beer_id      int
         constraint users_transactions_beers_id_fk

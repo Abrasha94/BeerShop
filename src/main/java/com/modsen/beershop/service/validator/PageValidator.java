@@ -1,16 +1,15 @@
 package com.modsen.beershop.service.validator;
 
-import com.modsen.beershop.repository.config.Configuration;
-import com.modsen.beershop.service.exceprion.ValidateException;
+import com.modsen.beershop.config.Configuration;
+import com.modsen.beershop.config.Messages;
+import com.modsen.beershop.service.exception.ValidateException;
 
 public enum PageValidator {
     INSTANCE;
 
-    public static final String INVALID_PAGE = "Invalid page";
-
     public void validatePage(Integer page) {
         if (page <= 0) {
-            throw new ValidateException(INVALID_PAGE);
+            throw new ValidateException(Messages.MESSAGE.invalidPage());
         }
     }
 

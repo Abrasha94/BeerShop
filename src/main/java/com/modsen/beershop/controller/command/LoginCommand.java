@@ -4,7 +4,7 @@ import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.model.User;
 import com.modsen.beershop.service.LoginService;
 import com.modsen.beershop.service.ResponseService;
-import com.modsen.beershop.service.exceprion.UserNotFoundException;
+import com.modsen.beershop.service.exception.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

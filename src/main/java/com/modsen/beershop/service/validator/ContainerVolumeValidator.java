@@ -1,6 +1,6 @@
 package com.modsen.beershop.service.validator;
 
-import com.modsen.beershop.repository.config.Configuration;
+import com.modsen.beershop.config.Configuration;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Function;

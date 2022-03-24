@@ -1,4 +1,4 @@
-package com.modsen.beershop.service.exceprion;
+package com.modsen.beershop.service.exception;
 
 public class ValidateException extends RuntimeException{
     public ValidateException(String message) {

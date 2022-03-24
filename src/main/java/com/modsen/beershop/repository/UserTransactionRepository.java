@@ -2,9 +2,8 @@ package com.modsen.beershop.repository;
 
 import com.modsen.beershop.controller.dto.BuyBeerDto;
 import com.modsen.beershop.model.UserTransaction;
-import com.modsen.beershop.service.exceprion.UnableToExecuteQueryException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
+import com.modsen.beershop.service.exception.UnableToGetPreparedStatementException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
@@ -12,24 +11,26 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public enum UserTransactionRepository {
     INSTANCE;
 
-    public static final String SELECT_USERS_TRANSACTIONS_BY_USER_ID = "select * from users_transactions where user_id = ? order by id limit ? offset ?";
+    public static final String SELECT_USERS_TRANSACTIONS_BY_UUID = "select * from users_transactions " +
+            "where user_uuid = ? order by id limit ? offset ?";
+    public static final String SELECT_ALL = "select * from users_transactions order by id limit ? offset ?";
+    public static final String INSERT_INTO_USERS_TRANSACTIONS =
+            "insert into users_transactions (user_uuid, beer_id, time_of_sale, quantity) " +
+                    "values (?, ?, ?, to_json(?::json))";
     public static final String BEER_ID = "beer_id";
     public static final String TIME_OF_SALE = "time_of_sale";
     public static final String QUANTITY = "quantity";
-    public static final String SELECT_ALL = "select * from users_transactions order by id limit ? offset ?";
-    public static final String USER_ID = "user_id";
+    public static final String USER_UUID = "user_uuid";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static final String INSERT_INTO_USERS_TRANSACTIONS = "insert into users_transactions (user_id, beer_id, time_of_sale, quantity) values (?, ?, ?, to_json(?::json))";
-
     public void create(BuyBeerDto buyBeerDto) {
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(INSERT_INTO_USERS_TRANSACTIONS)) {
-            ps.setInt(1, buyBeerDto.getUserId());
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(INSERT_INTO_USERS_TRANSACTIONS)) {
+            ps.setString(1, buyBeerDto.getUserUuid().toString());
             ps.setInt(2, buyBeerDto.getBeer().getId());
             ps.setTimestamp(3, Timestamp.from(Instant.now()));
             ps.setString(4, objectMapper.writeValueAsString(buyBeerDto.getQuantity()));
@@ -39,11 +40,10 @@ public enum UserTransactionRepository {
 
     }
 
-    public List<UserTransaction> readByUserId(Integer id, Integer pageSize, Integer page) {
+    public List<UserTransaction> readByUserUuid(UUID uuid, Integer pageSize, Integer page) {
         final List<UserTransaction> userTransactions = new ArrayList<>();
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_USERS_TRANSACTIONS_BY_USER_ID)) {
-            ps.setInt(1, id);
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_USERS_TRANSACTIONS_BY_UUID)) {
+            ps.setObject(1, uuid);
             ps.setInt(2, pageSize);
             ps.setInt(3, pageSize * (page - 1));
             try (ResultSet rs = ps.executeQuery()) {
@@ -65,14 +65,13 @@ public enum UserTransactionRepository {
 
     public List<UserTransaction> readAll(Integer pageSize, Integer page) {
         final List<UserTransaction> usersTransactions = new ArrayList<>();
-        try (Connection conn = ConnectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_ALL)) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_ALL)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, pageSize * (page - 1));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     usersTransactions.add(UserTransaction.builder()
-                            .userId(rs.getInt(USER_ID))
+                            .userUuid(rs.getObject(USER_UUID, UUID.class))
                             .beerId(rs.getInt(BEER_ID))
                             .build());
                 }

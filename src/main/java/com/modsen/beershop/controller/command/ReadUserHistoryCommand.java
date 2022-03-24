@@ -7,10 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class ReadUserHistoryCommand implements Command {
 
-    public static final String UUID = "UUID";
+    public static final String USER_UUID = "UUID";
     public static final String SIZE = "size";
     public static final String PAGE = "page";
 
@@ -18,7 +19,7 @@ public class ReadUserHistoryCommand implements Command {
     public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws IOException {
         try {
-            final Object uuid = httpServletRequest.getSession().getAttribute(UUID);
+            final UUID uuid = (UUID) httpServletRequest.getSession().getAttribute(USER_UUID);
             final Integer size = Integer.valueOf(httpServletRequest.getParameter(SIZE));
             final Integer page = Integer.valueOf(httpServletRequest.getParameter(PAGE));
             final UserHistoryResponse userHistoryResponse = ReadUserHistoryService.INSTANCE.read(page, size, uuid);

@@ -3,14 +3,15 @@ package com.modsen.beershop.controller.command;
 import com.modsen.beershop.controller.request.BuyBeerRequest;
 import com.modsen.beershop.service.BuyBeerService;
 import com.modsen.beershop.service.ResponseService;
-import com.modsen.beershop.service.exceprion.BeerNotFoundException;
-import com.modsen.beershop.service.exceprion.ValidateException;
+import com.modsen.beershop.service.exception.BeerNotFoundException;
+import com.modsen.beershop.service.exception.ValidateException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class BuyBeerCommand implements Command {
@@ -23,7 +24,7 @@ public class BuyBeerCommand implements Command {
     public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         final BuyBeerRequest buyBeerRequest = objectMapper.readValue(httpServletRequest.getInputStream(), BuyBeerRequest.class);
         try {
-            buyBeerService.buy(buyBeerRequest,httpServletRequest.getSession().getAttribute("UUID"));
+            buyBeerService.buy(buyBeerRequest, (UUID) httpServletRequest.getSession().getAttribute("UUID"));
             httpServletResponse.resetBuffer();
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);
             httpServletResponse.flushBuffer();
