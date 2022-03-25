@@ -1,8 +1,7 @@
 package com.modsen.beershop.repository;
 
-import com.modsen.beershop.controller.dto.AddBeerDto;
+import com.modsen.beershop.controller.dto.CreateBeerDto;
 import com.modsen.beershop.model.Beer;
-import com.modsen.beershop.model.BeerDescription;
 import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
 
 import java.io.IOException;
@@ -24,11 +23,11 @@ public enum BeerRepository {
             "not in (select id from beers where beer_description::jsonb @> '{\"quantity\" : 0}' " +
             "or beer_description::jsonb @> '{\"quantity\" : 0.0}') order by id limit ? offset ?";
     public static final String CREATE_BEER =
-            "insert into beers (name, container, type, abv, ibu, created, update, beer_description) " +
-                    "values (?, ?, ?, ?, ?, ?, ?, to_json(?::json))";
-    public static final String UPDATE_BEER = "update beers set beer_description = to_json(?::json), update = ? " +
+            "insert into beers (name, container, type, abv, ibu, created, update, beer_description, quantity) " +
+                    "values (?, ?, ?, ?, ?, ?, ?, to_json(?::json), ?)";
+    public static final String UPDATE_BEER_BY_ID = "update beers set quantity = ?, update = ? " +
             "where id = ?";
-    public static final String UPDATE_BEERS = "update beers set beer_description = to_json(?::json) " +
+    public static final String UPDATE_BEER_QUANTITY = "update beers set quantity = ? " +
             "where name = ? and container = ?";
     public static final String ID = "id";
     public static final String NAME = "name";
@@ -37,6 +36,7 @@ public enum BeerRepository {
     public static final String ABV = "abv";
     public static final String IBU = "ibu";
     public static final String BEER_DESCRIPTION = "beer_description";
+    public static final String QUANTITY = "quantity";
 
 
     public boolean isExistBeerById(Integer id) {
@@ -62,40 +62,41 @@ public enum BeerRepository {
         }
     }
 
-    public AddBeerDto createBeer(AddBeerDto addBeerDto) {
+    public CreateBeerDto createBeer(CreateBeerDto createBeerDto) {
         try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(CREATE_BEER)) {
-            ps.setString(1, addBeerDto.getName());
-            ps.setString(2, addBeerDto.getContainer());
-            ps.setString(3, addBeerDto.getType());
-            ps.setDouble(4, addBeerDto.getAbv());
-            ps.setInt(5, addBeerDto.getIbu());
+            ps.setString(1, createBeerDto.getName());
+            ps.setString(2, createBeerDto.getContainer());
+            ps.setString(3, createBeerDto.getType());
+            ps.setDouble(4, createBeerDto.getAbv());
+            ps.setInt(5, createBeerDto.getIbu());
             ps.setTimestamp(6, Timestamp.from(Instant.now()));
             ps.setTimestamp(7, Timestamp.from(Instant.now()));
-            ps.setString(8, objectMapper.writeValueAsString(addBeerDto.getBeerDescription()));
+            ps.setString(8, objectMapper.writeValueAsString(createBeerDto.getBeerDescription()));
+            ps.setInt(9, createBeerDto.getQuantity());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    addBeerDto.setId(rs.getInt(1));
+                    createBeerDto.setId(rs.getInt(1));
                 }
-                return addBeerDto;
+                return createBeerDto;
             }
         } catch (SQLException | IOException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
         }
     }
 
-    public void updateBeerDescription(BeerDescription beerDescription, Integer id) {
-        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEER)) {
-            ps.setString(1, objectMapper.writeValueAsString(beerDescription));
+    public void updateBeerTable(Integer quantity, Integer id) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEER_BY_ID)) {
+            ps.setInt(1, quantity);
             ps.setTimestamp(2, Timestamp.from(Instant.now()));
             ps.setInt(3, id);
             ps.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
         }
     }
 
-    public <T> Optional<Beer> readBeerById(Integer id, Class<T> tClass) {
+    public <T> Optional<Beer> readBeerById(Integer id) {
         Beer beer = null;
         try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(SELECT_BEER_BY_ID)) {
             ps.setInt(1, id);
@@ -108,11 +109,10 @@ public enum BeerRepository {
                             .type(rs.getString(TYPE))
                             .abv(rs.getDouble(ABV))
                             .ibu(rs.getInt(IBU))
-                            .beerDescription((BeerDescription) objectMapper.readValue(rs.getString(BEER_DESCRIPTION), tClass))
+                            .beerDescription(rs.getString(BEER_DESCRIPTION))
+                            .quantity(rs.getInt(QUANTITY))
                             .build();
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage());
             }
         } catch (SQLException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
@@ -120,13 +120,13 @@ public enum BeerRepository {
         return Optional.ofNullable(beer);
     }
 
-    public void updateBeer(Beer beer) {
-        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEERS)) {
-            ps.setString(1, objectMapper.writeValueAsString(beer.getBeerDescription()));
+    public void updateBeerQuantity(Beer beer) {
+        try (final PreparedStatement ps = ConnectionPool.getPreparedStatement(UPDATE_BEER_QUANTITY)) {
+            ps.setInt(1, beer.getQuantity());
             ps.setString(2, beer.getName());
             ps.setString(3, beer.getContainer());
             ps.executeUpdate();
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             throw new UnableToExecuteQueryException(e.getMessage());
         }
     }

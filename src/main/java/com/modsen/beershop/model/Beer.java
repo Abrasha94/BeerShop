@@ -16,5 +16,6 @@ public class Beer {
     private Integer ibu;
     private Instant created;
     private Instant update;
-    private BeerDescription beerDescription;
+    private String beerDescription;
+    private Integer quantity;
 }

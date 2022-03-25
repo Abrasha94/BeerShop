@@ -19,13 +19,14 @@ import static com.modsen.beershop.utils.ObjectMapperBean.objectMapper;
 public class BuyBeerCommand implements Command {
     public static final String BUCKET = "/bucket";
     public static final String POST = "POST";
+    public static final String UUID = "UUID";
     private final BuyBeerService buyBeerService;
 
     @Override
     public void execute(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         final BuyBeerRequest buyBeerRequest = objectMapper.readValue(httpServletRequest.getInputStream(), BuyBeerRequest.class);
         try {
-            buyBeerService.buy(buyBeerRequest, (UUID) httpServletRequest.getSession().getAttribute("UUID"));
+            buyBeerService.buy(buyBeerRequest, (UUID) httpServletRequest.getSession().getAttribute(UUID));
             httpServletResponse.resetBuffer();
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);
             httpServletResponse.flushBuffer();

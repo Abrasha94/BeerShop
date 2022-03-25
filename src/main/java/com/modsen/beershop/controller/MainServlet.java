@@ -14,25 +14,19 @@ import com.modsen.beershop.controller.request.CreateBeerRequest;
 import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.controller.request.RegistrationRequest;
 import com.modsen.beershop.controller.request.UpdateBeerRequest;
-import com.modsen.beershop.model.BottleBeerDescription;
 import com.modsen.beershop.model.BottleBeerOrder;
-import com.modsen.beershop.model.DraftBeerDescription;
 import com.modsen.beershop.model.DraftBeerOrder;
 import com.modsen.beershop.service.*;
 import com.modsen.beershop.service.exception.CommandNotFoundException;
 import com.modsen.beershop.service.exception.ConfigurationException;
 import com.modsen.beershop.service.exception.UnableToExecuteQueryException;
 import com.modsen.beershop.service.validator.*;
-import com.modsen.beershop.service.validator.verifier.BottleBeerOrderVerifier;
-import com.modsen.beershop.service.validator.verifier.BottleBeerVerifier;
-import com.modsen.beershop.service.validator.verifier.DraftBeerOrderVerifier;
-import com.modsen.beershop.service.validator.verifier.DraftBeerVerifier;
+import com.modsen.beershop.service.validator.verifier.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.util.List;
@@ -67,16 +61,13 @@ public class MainServlet extends HttpServlet {
                                 new FieldValidator<>(CreateBeerRequest::getType, Messages.MESSAGE.typeEmpty()),
                                 new FieldValidator<>(CreateBeerRequest::getAbv, Messages.MESSAGE.abvEmpty()),
                                 new FieldValidator<>(CreateBeerRequest::getIbu, Messages.MESSAGE.ibuEmpty()),
+                                new FieldValidator<>(CreateBeerRequest::getQuantity, Messages.MESSAGE.quantityEmpty()),
                                 new ContainerValidator(),
                                 new AbvValidator(),
                                 new IbuValidator()),
                                 List.of(
-                                        new DraftBeerVerifier(List.of(
-                                                new FieldValidator<>(DraftBeerDescription::getQuantity, Messages.MESSAGE.quantitySmall()))),
                                         new BottleBeerVerifier(List.of(
-                                                new FieldValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.volumeSmall()),
-                                                new FieldValidator<>(BottleBeerDescription::getQuantity, Messages.MESSAGE.bottleQuantitySmall()),
-                                                new ContainerVolumeValidator<>(BottleBeerDescription::getContainerVolume, Messages.MESSAGE.incorrectVolume())))))),
+                                                new ContainerVolumeValidator<>(CreateBeerRequest::getContainerVolume, Messages.MESSAGE.incorrectVolume())))))),
                 new BuyBeerCommand(
                         new BuyBeerService(List.of(
                                 new BottleBeerOrderValidatorVerifier(List.of(
@@ -93,9 +84,7 @@ public class MainServlet extends HttpServlet {
                 new UpdateBeerCommand(
                         new UpdateBeerService(List.of(
                                 new FieldValidator<>(UpdateBeerRequest::getId, Messages.MESSAGE.beerIdEmpty()),
-                                new FieldValidator<>(UpdateBeerRequest::getContainerVolume, Messages.MESSAGE.volumeEmpty()),
-                                new FieldValidator<>(UpdateBeerRequest::getQuantity, Messages.MESSAGE.quantityEmpty()),
-                                new ContainerVolumeValidator<>(UpdateBeerRequest::getContainerVolume, Messages.MESSAGE.incorrectVolume())))));
+                                new FieldValidator<>(UpdateBeerRequest::getQuantity, Messages.MESSAGE.quantityEmpty())))));
         getCommands = List.of(new ReadUserHistoryCommand(), new ReadAllUsersHistoryCommand(), new ListOfAvailableBeersCommand());
     }
 

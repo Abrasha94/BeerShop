@@ -8,9 +8,11 @@ create table beers
     type             varchar(10)      not null,
     abv              double precision not null,
     ibu              int              not null,
-    beer_description json,
+    beer_description varchar,
     created          timestamp,
-    update           timestamp
+    update           timestamp,
+    quantity         integer,
+    container_volume double precision
 );
 
 alter table beers

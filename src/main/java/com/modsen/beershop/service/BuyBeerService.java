@@ -34,7 +34,7 @@ public class BuyBeerService {
                 .map(v -> v.verify(buyBeerRequest))
                 .flatMap(Collection::stream)
                 .forEach(buyBeerDto -> {
-            BeerRepository.INSTANCE.updateBeer(buyBeerDto.getBeer());
+            BeerRepository.INSTANCE.updateBeerQuantity(buyBeerDto.getBeer());
             buyBeerDto.setUserUuid(uuid);
             UserTransactionRepository.INSTANCE.create(buyBeerDto);
         });

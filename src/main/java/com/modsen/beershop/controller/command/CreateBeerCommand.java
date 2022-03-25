@@ -1,7 +1,7 @@
 package com.modsen.beershop.controller.command;
 
 import com.modsen.beershop.controller.request.CreateBeerRequest;
-import com.modsen.beershop.controller.response.AddBeerResponse;
+import com.modsen.beershop.controller.response.CreateBeerResponse;
 import com.modsen.beershop.service.CreateBeerService;
 import com.modsen.beershop.service.ResponseService;
 import com.modsen.beershop.service.exception.BeerExistException;
@@ -27,8 +27,8 @@ public class CreateBeerCommand implements Command {
         final CreateBeerRequest createBeerRequest = objectMapper.readValue(httpServletRequest.getInputStream(),
                 CreateBeerRequest.class);
         try {
-            final AddBeerResponse addBeerResponse = createBeerService.create(createBeerRequest);
-            ResponseService.INSTANCE.send(httpServletResponse, addBeerResponse, HttpServletResponse.SC_OK);
+            final CreateBeerResponse createBeerResponse = createBeerService.create(createBeerRequest);
+            ResponseService.INSTANCE.send(httpServletResponse, createBeerResponse, HttpServletResponse.SC_OK);
         } catch (BeerExistException | BeerVerifierNotFoundException | ValidateException | IOException e) {
             ResponseService.INSTANCE.send(httpServletResponse, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
         }

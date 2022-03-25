@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class DraftBeerOrder {
     private Integer id;
-    private Double quantity;
+    private Integer quantity;
 }

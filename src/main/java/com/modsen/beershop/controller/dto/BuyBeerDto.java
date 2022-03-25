@@ -11,5 +11,5 @@ import java.util.UUID;
 public class BuyBeerDto {
     private final Beer beer;
     private UUID userUuid;
-    private final Object quantity;
+    private final Integer quantity;
 }

@@ -1,6 +1,5 @@
 package com.modsen.beershop.controller.request;
 
-import com.modsen.beershop.model.BeerDescription;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,5 +11,7 @@ public class CreateBeerRequest {
     private String type;
     private Double abv;
     private Integer ibu;
-    private BeerDescription beerDescription;
+    private String beerDescription;
+    private Integer quantity;
+    private Double containerVolume;
 }

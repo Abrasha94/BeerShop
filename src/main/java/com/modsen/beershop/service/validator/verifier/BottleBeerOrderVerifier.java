@@ -4,7 +4,6 @@ import com.modsen.beershop.config.Messages;
 import com.modsen.beershop.controller.dto.BuyBeerDto;
 import com.modsen.beershop.controller.request.BuyBeerRequest;
 import com.modsen.beershop.model.Beer;
-import com.modsen.beershop.model.BottleBeerDescription;
 import com.modsen.beershop.model.BottleBeerOrder;
 import com.modsen.beershop.repository.BeerRepository;
 import com.modsen.beershop.service.exception.AvailableQuantityException;
@@ -20,15 +19,13 @@ public class BottleBeerOrderVerifier implements Verifier<BuyBeerRequest, List<Bu
         List<BuyBeerDto> buyBeerDtoList = new ArrayList<>();
         for (BottleBeerOrder bottleBeerOrder : value.getBottleBeerOrders()) {
             final Beer beer =
-                    BeerRepository.INSTANCE.readBeerById(bottleBeerOrder.getId(), BottleBeerDescription.class)
+                    BeerRepository.INSTANCE.readBeerById(bottleBeerOrder.getId())
                             .orElseThrow(() -> new BeerNotFoundException(Messages.MESSAGE.beerNotFound()));
-            final BottleBeerDescription beerDescription = (BottleBeerDescription) beer.getBeerDescription();
-            final Integer availability = beerDescription.getQuantity();
+            final Integer availability = beer.getQuantity();
             if (availability < bottleBeerOrder.getQuantity()) {
                 throw new AvailableQuantityException(Messages.MESSAGE.notEnoughQuantity());
             }
-            beerDescription.setQuantity(availability - bottleBeerOrder.getQuantity());
-            beer.setBeerDescription(beerDescription);
+            beer.setQuantity(availability - bottleBeerOrder.getQuantity());
             buyBeerDtoList.add(BuyBeerDto.builder()
                     .beer(beer)
                     .quantity(bottleBeerOrder.getQuantity())
