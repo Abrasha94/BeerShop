@@ -30,7 +30,7 @@ public class RegistrationService {
         }
 
         final UUID uuid = UUID.randomUUID();
-        UserRepository.INSTANCE.createUser(login, password, email, uuid, ROLE_USER);
+        UserRepository.INSTANCE.createUser(login, password, email, ROLE_USER);
 
         return uuid;
     }

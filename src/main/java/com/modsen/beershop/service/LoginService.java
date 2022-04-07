@@ -1,10 +1,8 @@
 package com.modsen.beershop.service;
 
-import com.modsen.beershop.config.Messages;
 import com.modsen.beershop.controller.request.LoginRequest;
 import com.modsen.beershop.model.User;
 import com.modsen.beershop.repository.UserRepository;
-import com.modsen.beershop.service.exception.UserNotFoundException;
 import com.modsen.beershop.service.validator.Validator;
 import lombok.AllArgsConstructor;
 
@@ -17,7 +15,6 @@ public class LoginService {
     public User login(LoginRequest loginRequest) {
 
         ValidateService.INSTANCE.validate(validators, loginRequest);
-        return UserRepository.INSTANCE.readUserByLoginAndPassword(loginRequest.getLogin(), loginRequest.getPassword())
-                .orElseThrow(() -> new UserNotFoundException(Messages.MESSAGE.wrongLoginOrPassword()));
+        return UserRepository.INSTANCE.readUserByLoginAndPassword(loginRequest.getLogin(), loginRequest.getPassword());
     }
 }
