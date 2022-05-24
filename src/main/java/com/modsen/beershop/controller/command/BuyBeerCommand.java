@@ -38,6 +38,6 @@ public class BuyBeerCommand implements Command {
     @Override
     public boolean filter(HttpServletRequest httpServletRequest) {
         final String pathInfo = httpServletRequest.getPathInfo();
-        return pathInfo.equals(BUCKET) & httpServletRequest.getMethod().equals(POST);
+        return pathInfo.equals(BUCKET) && httpServletRequest.getMethod().equals(POST);
     }
 }

@@ -7,5 +7,5 @@ import java.util.List;
 
 @AllArgsConstructor
 public class AllUsersHistoryResponse {
-    List<UserTransaction> userTransactions;
+   List<UserTransaction> userTransactions;
 }

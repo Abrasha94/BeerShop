@@ -45,8 +45,7 @@ public enum Messages {
     private final Properties properties = new Properties();
 
     Messages() {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE);
+        try (FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE)){
             properties.load(fileInputStream);
         } catch (IOException e) {
             throw new MessageException(e.getMessage());

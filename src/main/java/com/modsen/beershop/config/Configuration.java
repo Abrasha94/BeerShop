@@ -26,8 +26,7 @@ public enum Configuration {
     private final Properties config = new Properties();
 
     Configuration() {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE);
+        try (FileInputStream fileInputStream = new FileInputStream(PROPERTIES_FILE)) {
             config.load(fileInputStream);
         } catch (IOException e) {
             throw new ConfigurationException(e.getMessage());

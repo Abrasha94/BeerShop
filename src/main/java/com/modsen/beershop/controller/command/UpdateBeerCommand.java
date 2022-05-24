@@ -32,6 +32,6 @@ public class UpdateBeerCommand implements Command {
     @Override
     public boolean filter(HttpServletRequest httpServletRequest) {
         final String pathInfo = httpServletRequest.getPathInfo();
-        return pathInfo.equals("/beers") & httpServletRequest.getMethod().equals("PUT");
+        return pathInfo.equals("/beers") && httpServletRequest.getMethod().equals("PUT");
     }
 }

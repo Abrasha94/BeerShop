@@ -4,5 +4,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public class ObjectMapperBean {
 
-    public static ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapperBean() {
+    }
+
+    public static final ObjectMapper objectMapper = new ObjectMapper();
 }

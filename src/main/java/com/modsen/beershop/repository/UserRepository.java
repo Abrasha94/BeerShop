@@ -20,7 +20,7 @@ public enum UserRepository {
                     .setParameter(1, login)
                     .setParameter(2, email)
                     .getSingleResult();
-            return !(user == null);
+            return user != null;
         }
     }
 

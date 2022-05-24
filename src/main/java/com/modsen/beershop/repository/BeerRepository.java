@@ -22,7 +22,7 @@ public enum BeerRepository {
     public boolean isExistBeerById(Integer id) {
         try (final Session session = HibernateUtil.getSessionFactory().openSession()) {
             final Beer beer = session.get(Beer.class, id);
-            return !(beer == null);
+            return beer != null;
         }
     }
 
@@ -32,7 +32,7 @@ public enum BeerRepository {
                     .setParameter(1, name)
                     .setParameter(2, container)
                     .getSingleResult();
-            return !(beer == null);
+            return beer != null;
         }
     }
 
@@ -67,7 +67,7 @@ public enum BeerRepository {
         }
     }
 
-    public <T> Optional<Beer> readBeerById(Integer id) {
+    public Optional<Beer> readBeerById(Integer id) {
 
         try (final Session session = HibernateUtil.getSessionFactory().openSession()) {
             final Beer beer = session.get(Beer.class, id);

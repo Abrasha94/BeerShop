@@ -29,6 +29,6 @@ public class ReadAllUsersHistoryCommand implements Command {
     @Override
     public boolean filter(HttpServletRequest httpServletRequest) {
         final String pathInfo = httpServletRequest.getPathInfo();
-        return pathInfo.equals("/history/users") & httpServletRequest.getMethod().equals("GET");
+        return pathInfo.equals("/history/users") && httpServletRequest.getMethod().equals("GET");
     }
 }

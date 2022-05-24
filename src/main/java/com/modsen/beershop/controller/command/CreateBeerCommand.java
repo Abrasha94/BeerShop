@@ -37,6 +37,6 @@ public class CreateBeerCommand implements Command {
     @Override
     public boolean filter(HttpServletRequest httpServletRequest) {
         final String path = httpServletRequest.getPathInfo();
-        return path.startsWith(BEERS) & httpServletRequest.getMethod().equals(POST);
+        return path.startsWith(BEERS) && httpServletRequest.getMethod().equals(POST);
     }
 }

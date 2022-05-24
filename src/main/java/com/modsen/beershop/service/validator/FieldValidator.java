@@ -12,7 +12,7 @@ public class FieldValidator<T> implements Validator<T> {
 
     @Override
     public boolean isValid(T value) {
-        return function.apply(value) == null | function.apply(value).toString().isEmpty();
+        return function.apply(value) == null || function.apply(value).toString().isEmpty();
     }
 
     @Override

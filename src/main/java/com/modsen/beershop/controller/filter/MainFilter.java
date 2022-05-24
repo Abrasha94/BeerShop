@@ -26,6 +26,7 @@ public class MainFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        //Do nothing
     }
 
     @Override
@@ -37,21 +38,17 @@ public class MainFilter implements Filter {
         final HttpSession session = req.getSession(false);
         final String path = req.getPathInfo();
 
-        if (path.startsWith(LOGIN) | path.startsWith(REGISTRATION)) {
+        if (path.startsWith(LOGIN) || path.startsWith(REGISTRATION)) {
             chain.doFilter(servletRequest, servletResponse);
         } else {
             if (session == null) {
                 ResponseService.INSTANCE.send(res, SING_IN_MESSAGE, HttpServletResponse.SC_BAD_REQUEST);
             } else {
-                if (session.getAttribute(ROLE).equals(USER)) {
-                    if (path.startsWith(BEERS) | path.startsWith(ITEMS) | path.startsWith(HISTORY)) {
-                        chain.doFilter(servletRequest, servletResponse);
-                    }
+                if (session.getAttribute(ROLE).equals(USER) && (path.startsWith(BEERS) || path.startsWith(ITEMS) || path.startsWith(HISTORY))) {
+                    chain.doFilter(servletRequest, servletResponse);
                 }
-                if (session.getAttribute(ROLE).equals(ADMIN)) {
-                    if (path.startsWith(BEERS) | path.startsWith(USERS_HISTORY)) {
-                        chain.doFilter(servletRequest, servletResponse);
-                    }
+                if (session.getAttribute(ROLE).equals(ADMIN) && (path.startsWith(BEERS) || path.startsWith(USERS_HISTORY))) {
+                    chain.doFilter(servletRequest, servletResponse);
                 }
                 ResponseService.INSTANCE.send(res, NOT_FOUND_MESSAGE, HttpServletResponse.SC_NOT_FOUND);
             }
@@ -60,5 +57,6 @@ public class MainFilter implements Filter {
 
     @Override
     public void destroy() {
+        //Do nothing
     }
 }
